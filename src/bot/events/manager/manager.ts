@@ -13,7 +13,7 @@ export default async (client: DiscordMusicBot) => {
 
     client.manager.on(
       'reconnecting',
-      (_, info, __, reconnectInterval, triesLeft) => {
+      (_, reconnectInterval, triesLeft) => {
         client.log.info(
           `Manager trying to reconnect in ${reconnectInterval}s. Tries left: ${triesLeft}`
         )
@@ -26,7 +26,7 @@ export default async (client: DiscordMusicBot) => {
         : client.log.info('Manager ready!')
     })
 
-    client.manager.on('disconnect', (_, players, moved) => {
+    client.manager.on('disconnect', (_, count) => {
       client.log.warn('Websocket Lavalink disconnected!')
     })
 

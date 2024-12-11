@@ -9,6 +9,7 @@ import { Command } from '../../../structures/Command'
 import { DiscordTrack } from '../../../structures/Dispatcher'
 import { isValidURL } from '../../../utils/URL'
 import EmbedBlueprint from '../../../structures/EmbedBlueprint'
+import { LoadType } from 'shoukaku'
 
 module.exports = new Command({
   name: 'play',
@@ -46,30 +47,31 @@ module.exports = new Command({
       }
 
       switch (res?.loadType) {
-        case 'LOAD_FAILED': {
+        case LoadType.ERROR: {
           const embed = new EmbedBlueprint(client).error(
             'Произошла ошибка во время поиска трека'
           )
           ctx.sendMessage({ embeds: [embed] })
           return
         }
-        case 'NO_MATCHES': {
+        case LoadType.EMPTY: {
           const embed = new EmbedBlueprint(client).message('Ничего не найдено')
           ctx.sendMessage({ embeds: [embed] })
           return
         }
-        case 'PLAYLIST_LOADED': {
+        case LoadType.PLAYLIST: {
           let embed: EmbedBuilder | null = null
-          res.tracks.forEach((t, i) => {
+          res.data. tracks.forEach((t, i) => {
             const track = new DiscordTrack({
-              track: t.track,
+              encoded: t.encoded,
               info: t.info,
               requester: ctx.member as GuildMember,
+              pluginInfo: t.pluginInfo,
             })
             if (i === 0) {
               embed = new EmbedBlueprint(client).enqueuePlaylist({
                 thumbnailURL: track.info.thumbnailURL,
-                title: res.playlistInfo.name!,
+                title: res.data.info.name,
                 url: args[0],
               })
             }
@@ -79,12 +81,14 @@ module.exports = new Command({
           ctx.sendMessage({ embeds: [embed] })
           break
         }
-        case 'TRACK_LOADED':
-        case 'SEARCH_RESULT': {
+        //case LoadType.TRACK:
+        case LoadType.SEARCH: {
+          const data = res.data[0]
           const track = new DiscordTrack({
-            track: res.tracks[0].track,
-            info: res.tracks[0].info,
+            encoded: data.encoded,
+            info: data.info,
             requester: ctx.member as GuildMember,
+            pluginInfo: data.pluginInfo,
           })
           dispatcher?.enqueue(track)
 

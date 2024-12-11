@@ -1,6 +1,6 @@
-import { Player, Track } from 'shoukaku'
+import { Player, Shoukaku, Track } from 'shoukaku'
 import DiscordMusicBot from './DiscordMusicBot'
-import { GuildMember, TextBasedChannel, VoiceBasedChannel } from 'discord.js'
+import { GuildMember, TextBasedChannel, TextChannel, VoiceBasedChannel } from 'discord.js'
 import EmbedBlueprint from './EmbedBlueprint'
 import Timer from '../utils/Timer'
 import { QueueSocketEmitter } from '../server/sockets/emitters/queue.emitter'
@@ -11,7 +11,7 @@ export interface IDiscordTrack extends Track {
 }
 
 export class DiscordTrack implements IDiscordTrack {
-  track: string
+  encoded: string
   info: {
     identifier: string
     isSeekable: boolean
@@ -21,16 +21,17 @@ export class DiscordTrack implements IDiscordTrack {
     position: number
     thumbnailURL: string
     title: string
-    uri: string
+    uri?: string
     sourceName: string
   }
+  pluginInfo: unknown
   requester: GuildMember
 
   constructor(options: IDiscordTrack) {
     const thumbnailURL = `https://img.youtube.com/vi/${options.info.identifier}/0.jpg`
     this.info = { ...options.info, thumbnailURL }
     this.requester = options.requester
-    this.track = options.track
+    this.encoded = options.encoded
   }
 }
 
@@ -39,6 +40,7 @@ export interface IDispatcherOptions {
   guildId: string
   voiceId: string
   channelId: string
+  manager: Shoukaku
   player: Player
 }
 
@@ -46,6 +48,7 @@ export default class Dispatcher {
   private _client: DiscordMusicBot
   private _guildId: string
   private _channelId: string
+  private _manager: Shoukaku
   private _player: Player
   private _queue: DiscordTrack[]
   private _current: DiscordTrack | null
@@ -55,6 +58,7 @@ export default class Dispatcher {
     this._client = options.client
     this._guildId = options.guildId
     this._channelId = options.channelId
+    this._manager = options.manager
     this._player = options.player
     this._queue = []
     this._current = null
@@ -67,7 +71,7 @@ export default class Dispatcher {
       this._current = null
       this._player.position = 0
 
-      if (event.reason === 'FINISHED') {
+      if (event.reason === 'finished') {
         await this.tryPlay()
       }
 
@@ -77,7 +81,7 @@ export default class Dispatcher {
       if (!this._current) return
       const channel = this._client.channels.cache.get(
         this._channelId
-      ) as TextBasedChannel
+      ) as TextChannel
       const embed = new EmbedBlueprint(this._client).nowPlaying(this._current)
       channel.send({ embeds: [embed] })
 
@@ -120,7 +124,7 @@ export default class Dispatcher {
     return this._timer
   }
   get voiceId() {
-    return this._player.connection.channelId
+    return this._manager.connections.get(this._guildId)?.channelId
   }
 
   clear() {
@@ -128,7 +132,7 @@ export default class Dispatcher {
   }
 
   destroy() {
-    this._player.connection.disconnect()
+    this._manager.leaveVoiceChannel(this._guildId)
     this.setQueue([])
     this._client.subscription.delete(this._guildId)
 
@@ -141,7 +145,7 @@ export default class Dispatcher {
 
   async join(voice: VoiceBasedChannel) {
     try {
-      await this._player.connection.connect({
+      await this._manager.joinVoiceChannel({
         channelId: voice.id,
         guildId: this._guildId,
         shardId: 0,
@@ -153,7 +157,7 @@ export default class Dispatcher {
 
   moveTrack(from: number, to: number) {
     if (!this._current) return
-    
+
     const queue = [...this._queue]
     const track = queue.splice(from, 1)[0]
 
@@ -210,7 +214,7 @@ export default class Dispatcher {
 
     const queue = [...this._queue]
     const track = queue.shift() as DiscordTrack
-    await this._player.playTrack(track)
+    await this._player.playTrack({ track })
     this._current = track
 
     this.setQueue(queue)

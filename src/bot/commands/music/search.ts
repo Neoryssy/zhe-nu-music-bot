@@ -7,6 +7,7 @@ import {
   StringSelectMenuOptionBuilder,
 } from 'discord.js'
 import { Command } from '../../../structures/Command'
+import { LoadType } from 'shoukaku'
 
 module.exports = new Command({
   name: 'search',
@@ -37,21 +38,21 @@ module.exports = new Command({
       }
 
       switch (res?.loadType) {
-        case 'LOAD_FAILED': {
+        case LoadType.ERROR: {
           ctx.sendMessage({
             content: 'Произошла ошибка во время поиска',
           })
           return
         }
-        case 'NO_MATCHES': {
+        case LoadType.EMPTY: {
           ctx.sendMessage({
             content: 'Ничего не найдено',
           })
           return
         }
-        case 'TRACK_LOADED':
-        case 'SEARCH_RESULT': {
-          const tracks = res.tracks.slice(0, 10)
+        // case LoadType.TRACK:
+        case LoadType.SEARCH: {
+          const tracks = res.data.slice(0, 10)
           select
             .setCustomId('select-track')
             .setPlaceholder('Выберите трек')
@@ -84,7 +85,7 @@ module.exports = new Command({
       collector.on('collect', async (i) => {
         const selection = Number(i.values[0])
         await ctx.editMessage(
-          `${i.user} выбрал трек ${res.tracks[selection].info.title}`
+          `${i.user} выбрал трек ${res.data[selection].info.title}`
         )
         await i.deferUpdate()
       })

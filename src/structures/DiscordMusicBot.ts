@@ -37,7 +37,9 @@ export default class DiscordMusicBot extends Client {
   get log() {
     return this._log
   }
-  get manager(): Shoukaku | undefined {
+  get manager(): Shoukaku {
+    if (!this._manager) throw new Error('Manager is undefined. Call build() first.')
+
     return this._manager
   }
   get subscription() {

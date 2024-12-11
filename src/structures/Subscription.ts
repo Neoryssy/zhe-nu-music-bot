@@ -27,8 +27,9 @@ export default class Subscription extends Map<string, Dispatcher> {
 
       let dispatcher = this.get(guild.id)
       if (!dispatcher) {
-        const node = this._client.manager?.getNode()
-        const player = await node!.joinChannel({
+        const node = this._client.manager.options.nodeResolver(this._client.manager.nodes)
+
+        const player = await this._client.manager.joinVoiceChannel({
           channelId: voice.id,
           guildId: guild.id,
           shardId: 0,
@@ -39,6 +40,7 @@ export default class Subscription extends Map<string, Dispatcher> {
           guildId: guild.id,
           channelId: channel.id,
           voiceId: voice.id,
+          manager: this._client.manager,
           player,
         })
         this.set(guild.id, dispatcher)
@@ -50,7 +52,7 @@ export default class Subscription extends Map<string, Dispatcher> {
   }
 
   async search(query: string) {
-    const node = this._client.manager?.getNode()
+    const node = this._client.manager.options.nodeResolver(this._client.manager.nodes)
     let response = null
     try {
       response = await node!.rest.resolve(
