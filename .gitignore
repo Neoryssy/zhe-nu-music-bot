@@ -1,0 +1,23 @@
+# Dependency directories
+node_modules/
+
+# Logs
+logs/
+*.log
+*.log.*.gz
+
+# Database files
+db/
+
+# dotenv environment variables file
+.env
+
+# Config
+application.yml
+config.json
+
+# Build output
+dist/
+
+# Optional npm cache directory
+.npm
