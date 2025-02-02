@@ -3,12 +3,14 @@
   "display": "Node 18",
 
   "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"]
+    },
     "lib": ["dom", "es2022"],
     "module": "CommonJS",
     "target": "es2022",
-
     "outDir": "dist",
-
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,

@@ -1,12 +1,12 @@
-import connectToMongoDB from '../utils/connectToMongoDB'
-import { httpServer } from './server'
+import connectToMongoDB from '@/utils/connectToMongoDB';
+import { httpServer } from './server';
 
 export const startServer = async () => {
-  const port = process.env.PORT || 3000
+  const port = process.env.PORT || 3000;
 
-  await connectToMongoDB()
+  await connectToMongoDB();
 
   httpServer.listen(port, () => {
-    console.log(`Listening on port ${port}`)
-  })
-}
+    console.log(`Listening on port ${port}`);
+  });
+};

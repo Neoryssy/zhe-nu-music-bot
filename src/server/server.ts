@@ -1,20 +1,20 @@
-import cors from 'cors'
-import express from 'express'
-import { createServer } from 'http'
-import routes from '../server/routes'
-import { initializeServerIO } from '../server/sockets'
+import cors from 'cors';
+import express from 'express';
+import { createServer } from 'http';
+import routes from '@/server/routes';
+import { initializeServerIO } from '@/server/sockets';
 
-const app = express()
+const app = express();
 
 app.use(
   cors({
     // origin: process.env.CORS_ORIGIN,
   })
-)
-app.use(express.json())
-app.use(routes)
+);
+app.use(express.json());
+app.use(routes);
 
-const httpServer = createServer(app)
-const serverIO = initializeServerIO(httpServer)
+const httpServer = createServer(app);
+const serverIO = initializeServerIO(httpServer);
 
-export { httpServer, serverIO }
+export { httpServer, serverIO };

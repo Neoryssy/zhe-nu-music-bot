@@ -6,10 +6,10 @@ import {
   TextBasedChannel,
   TextChannel,
   VoiceBasedChannel,
-} from 'discord.js'
-import { Command } from '../../../structures/Command'
-import Context from '../../../structures/Context'
-import DiscordMusicBot from '../../../structures/DiscordMusicBot'
+} from 'discord.js';
+import { Command } from '@/lib/Command';
+import Context from '@/lib/Context';
+import DiscordMusicBot from '@/lib/DiscordMusicBot';
 
 module.exports = new Command({
   name: 'join',
@@ -26,40 +26,40 @@ module.exports = new Command({
     ],
   },
   async executor(client, ctx, args) {
-    const channel = ctx.channel as TextBasedChannel
-    const guild = ctx.guild as Guild
-    const member = ctx.member as GuildMember
+    const channel = ctx.channel as TextBasedChannel;
+    const guild = ctx.guild as Guild;
+    const member = ctx.member as GuildMember;
     const voice: VoiceBasedChannel | null =
-      ctx.interaction?.options.getChannel('channel') || member.voice.channel
+      ctx.interaction?.options.getChannel('channel') || member.voice.channel;
 
     try {
       if (!voice) {
         await ctx.sendMessage({
           content: 'Вы должны быть в голосовом канале!',
-        })
-        return
+        });
+        return;
       }
 
-      let dispatcher = client.subscription.get(guild.id)
+      let dispatcher = client.subscription.get(guild.id);
       if (dispatcher) {
         await ctx.sendMessage({
           content: 'Я уже нахожусь в голосовом канале!',
-        })
-        return
+        });
+        return;
       } else {
         await ctx.sendMessage({
           content: 'Присоединяюсь к голосовому каналу...',
-        })
-        dispatcher = await client.subscription.create(guild, voice)
+        });
+        dispatcher = await client.subscription.create(guild, voice);
         await ctx.editMessage({
           content: `Я присоединился к голосовому каналу ${voice}!`,
-        })
+        });
       }
     } catch (error) {
-      client.log.error(error)
+      client.log.error(error);
       await ctx.sendMessage({
         content: 'Произошла ошибка при присоединении к голосовому каналу',
-      })
+      });
     }
   },
-})
+});

@@ -1,48 +1,48 @@
-import { PermissionFlagsBits } from 'discord.js'
-import discordClient from '../bot/discordClient'
+import { PermissionFlagsBits } from 'discord.js';
+import discordClient from '@/bot/discordClient';
 
 type RESTPartialGuild = {
-  bot: boolean
-  bot_master: boolean
-  id: string
-  name: string
-  icon: string | null
-  owner: boolean
-  permissions: string
-}
+  bot: boolean;
+  bot_master: boolean;
+  id: string;
+  name: string;
+  icon: string | null;
+  owner: boolean;
+  permissions: string;
+};
 
 export const fetchGuilds = async (authorization: string) => {
   const response = await fetch('https://discord.com/api/users/@me/guilds', {
     headers: { Authorization: authorization },
-  })
+  });
 
-  const data = await response.json()
+  const data = await response.json();
 
-  return { response, data }
-}
+  return { response, data };
+};
 
 export const fetchUserData = async (authorization: string) => {
   const response = await fetch('https://discord.com/api/users/@me', {
     headers: { Authorization: authorization },
-  })
+  });
 
-  const data = await response.json()
+  const data = await response.json();
 
-  return { response, data }
-}
+  return { response, data };
+};
 
 export const getClientGuildsWithUser = async (userId: string) => {
-  const managedGuilds: RESTPartialGuild[] = []
+  const managedGuilds: RESTPartialGuild[] = [];
 
   for (const [_, guild] of discordClient.guilds.cache) {
-    const member = await guild.members.fetch(userId).catch(() => undefined)
+    const member = await guild.members.fetch(userId).catch(() => undefined);
 
     if (!member) {
-      continue
+      continue;
     }
 
     if (!managedGuilds.find((m) => m.id === guild.id)) {
-      const owner = guild.ownerId === userId
+      const owner = guild.ownerId === userId;
       const managedGuild: RESTPartialGuild = {
         bot: true,
         bot_master: member.permissions.has(PermissionFlagsBits.ManageGuild),
@@ -51,33 +51,33 @@ export const getClientGuildsWithUser = async (userId: string) => {
         icon: guild.icon,
         owner: owner,
         permissions: member.permissions.toJSON(),
-      }
+      };
 
-      managedGuilds.push(managedGuild)
+      managedGuilds.push(managedGuild);
     }
   }
 
-  return managedGuilds
-}
+  return managedGuilds;
+};
 
 export function hasGuildPermission(
   permissions: number | string,
   permissionToCheck: bigint
 ) {
-  const bigIntPermissions = BigInt(permissions)
-  return (bigIntPermissions & permissionToCheck) === permissionToCheck
+  const bigIntPermissions = BigInt(permissions);
+  return (bigIntPermissions & permissionToCheck) === permissionToCheck;
 }
 
 export const processManagedGuilds = (
   guilds: {
-    id: string
-    name: string
-    icon: string | null
-    owner: boolean
-    permissions_new: string
+    id: string;
+    name: string;
+    icon: string | null;
+    owner: boolean;
+    permissions_new: string;
   }[]
 ) => {
-  const managedGuilds = []
+  const managedGuilds = [];
 
   for (const guild of guilds) {
     if (
@@ -86,7 +86,7 @@ export const processManagedGuilds = (
         PermissionFlagsBits.ManageGuild
       )
     ) {
-      continue
+      continue;
     }
 
     const managedGuild = {
@@ -97,10 +97,10 @@ export const processManagedGuilds = (
       icon: guild.icon,
       owner: guild.owner,
       permissions: guild.permissions_new,
-    }
+    };
 
-    managedGuilds.push(managedGuild)
+    managedGuilds.push(managedGuild);
   }
 
-  return managedGuilds
-}
+  return managedGuilds;
+};

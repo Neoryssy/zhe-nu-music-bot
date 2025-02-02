@@ -1,5 +1,5 @@
-import { GuildMember } from 'discord.js'
-import { Command } from '../../../structures/Command'
+import { GuildMember } from 'discord.js';
+import { Command } from '@/lib/Command';
 
 module.exports = new Command({
   name: 'user',
@@ -8,13 +8,13 @@ module.exports = new Command({
     enabled: true,
   },
   executor: async (client, ctx, args) => {
-    const member = ctx.member as GuildMember
+    const member = ctx.member as GuildMember;
     try {
       await ctx.sendMessage({
         content: `This command was run by ${ctx.author.username}, who joined on ${member?.joinedAt}.`,
-      })
+      });
     } catch (error) {
-      client.log.error(error)
+      client.log.error(error);
     }
   },
-})
+});

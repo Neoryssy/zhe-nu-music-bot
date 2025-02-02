@@ -1,5 +1,5 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js'
-import { Command } from '../../../structures/Command'
+import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { Command } from '@/lib/Command';
 
 module.exports = new Command({
   name: 'ping',
@@ -11,14 +11,14 @@ module.exports = new Command({
     try {
       const sent = await ctx.sendMessage({
         content: 'Pinging...',
-      })
+      });
       await ctx.editMessage({
         content: `Roundtrip latency: ${
           sent.createdTimestamp - ctx.createdTimestamp
         }ms`,
-      })
+      });
     } catch (error) {
-      client.log.error(error)
+      client.log.error(error);
     }
   },
-})
+});
